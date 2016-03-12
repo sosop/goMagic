@@ -15,6 +15,7 @@ type Article struct {
 func main() {
 	p := downloader.NewPage("http://toutiao.io/")
 	q, err := p.Parser()
+
 	if err != nil {
 		panic(err)
 	}
