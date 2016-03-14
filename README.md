@@ -2,9 +2,12 @@
 
 **设计思路参考WebMagic，依赖goquery**  
 
-`go get -u github.com/PuerkitoBio/goquery  
+
+```
+go get -u github.com/PuerkitoBio/goquery
 go get github.com/sosop/goMagic
-`
+```
+
 
 ### 一、使用
 #### 1、实现processor.Processor接口
