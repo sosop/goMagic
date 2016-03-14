@@ -3,7 +3,9 @@ package main
 import (
 	"goMagic/core"
 	"goMagic/downloader"
+	"goMagic/pipe"
 	"log"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -27,6 +29,7 @@ func (tt *ToutiaoProcessor) Process(p *downloader.Page) {
 		content := s.Find(".content .title a")
 		title := content.Text()
 		url, _ := content.Attr("href")
+		url = strings.TrimSpace(url)
 		p.PutField("Title", title)
 		p.PutField("URL", url)
 		if url != "" {
@@ -38,5 +41,5 @@ func (tt *ToutiaoProcessor) Process(p *downloader.Page) {
 }
 
 func main() {
-	core.NewMagic("test", &ToutiaoProcessor{}).AddURL("http://toutiao.io/"). /*.SetOutMode(pipe.MAPS)*/ Run()
+	core.NewMagic("test", &ToutiaoProcessor{}).AddURL("http://toutiao.io/"). /*.SetThread(8).SetPipeline(pipeline).SetQueue(q)*/ SetOutMode(pipe.MAPS).Run()
 }
