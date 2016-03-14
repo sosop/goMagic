@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"goMagic/core"
 	"goMagic/downloader"
+	"goMagic/pipe"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -12,8 +13,10 @@ type Article struct {
 	URL   string
 }
 
-func main() {
-	p := downloader.NewPage("http://toutiao.io/")
+type ToutiaoProcessor struct {
+}
+
+func (tt *ToutiaoProcessor) Process(p *downloader.Page) {
 	q, err := p.Parser()
 
 	if err != nil {
@@ -28,5 +31,8 @@ func main() {
 	})
 	var articles []Article
 	p.Objects(&articles)
-	fmt.Println(articles)
+}
+
+func main() {
+	core.NewMagic("test", &ToutiaoProcessor{}).AddURL("http://toutiao.io/").SetOutMode(pipe.MAPS).Run()
 }

@@ -2,17 +2,9 @@ package downloader
 
 import (
 	"encoding/json"
-	"goMagic/pipe"
-	proc "goMagic/processor"
-	sche "goMagic/scheduler"
 
 	"github.com/PuerkitoBio/goquery"
 )
-
-var Pipelines = make(map[string]*pipe.Pipeline, 16)
-var Processors = make(map[string]*proc.Processor, 16)
-var Queues = make(map[string]*sche.Queue, 16)
-var URLs = make(map[string]string, 16)
 
 type Page struct {
 	URL    string
@@ -31,7 +23,7 @@ func (p *Page) PutField(key, value string) {
 	p.Fields[key] = append(p.Fields[key], value)
 }
 
-func (p *Page) Objects(target interface{}) error {
+func (p *Page) Maps() []map[string]string {
 	cols := len(p.Fields)
 	colNames := make([]string, cols)
 	count := 0
@@ -50,7 +42,11 @@ func (p *Page) Objects(target interface{}) error {
 		objs[ir] = obj
 	}
 
-	data, err := json.Marshal(objs)
+	return objs
+}
+
+func (p *Page) Objects(target interface{}) error {
+	data, err := json.Marshal(p.Maps())
 	if err != nil {
 		return err
 	}

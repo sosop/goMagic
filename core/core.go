@@ -3,40 +3,62 @@ package core
 import (
 	"goMagic/downloader"
 	"goMagic/pipe"
-	"goMagic/processor"
+	proc "goMagic/processor"
 	"goMagic/scheduler"
+	"runtime"
+)
+
+var (
+	defaultThread = runtime.NumCPU()
 )
 
 type Magic struct {
+	TaskName string
+	Proc     proc.Processor
+	threadN  int
+	queue    scheduler.Queue
+	pipeline pipe.Pipeline
 }
 
-func NewMagic() *Magic {
-	return &Magic{}
+func NewMagic(taskName string, processor proc.Processor) *Magic {
+	return &Magic{taskName, processor, defaultThread, scheduler.NewMemQueue(), pipe.NewConsolePipeline()}
 }
 
-func (m *Magic) Add(name, url string, proc *processor.Processor, pipeline *pipe.Pipeline, queue *scheduler.Queue) *Magic {
-	downloader.URLs[name] = url
-	downloader.Processors[name] = proc
-	downloader.Pipelines[name] = pipeline
-	downloader.Queues[name] = queue
+func (m *Magic) SetQueue(q scheduler.Queue) *Magic {
+	m.queue = q
 	return m
 }
 
-func (m *Magic) AddDefault(name, url string, proc *processor.Processor) *Magic {
-	m.Add(name, url, proc, pipe.NewConsolePipeline(), scheduler.NewMemQueue())
+func (m *Magic) SetPipeline(p pipe.Pipeline) *Magic {
+	m.pipeline = p
 	return m
 }
 
-func (m *Magic) StartThread(nThread int) *Magic {
+func (m *Magic) SetOutMode(mode int) *Magic {
+	m.pipeline.Mode(mode)
+	return m
+}
+
+func (m *Magic) AddURL(url string) *Magic {
+	m.queue.Push(url)
+	return m
+}
+
+func (m *Magic) SetThread(nThread int) *Magic {
+	m.threadN = nThread
 	return m
 }
 
 func (m *Magic) execute() {
-	for name, url := range downloader.URLs {
-		downloader.Queues[name].Push(url)
-	}
+	url := m.queue.Pop()
+	p := downloader.NewPage(url.(string))
+	m.Proc.Process(p)
+	m.pipeline.Out(p)
 }
 
 func (m *Magic) Run() {
-
+	defer m.pipeline.Close()
+	for m.queue.Length() > 0 {
+		m.execute()
+	}
 }
