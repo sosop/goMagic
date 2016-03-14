@@ -2,9 +2,17 @@ package downloader
 
 import (
 	"encoding/json"
+	"goMagic/pipe"
+	proc "goMagic/processor"
+	sche "goMagic/scheduler"
 
 	"github.com/PuerkitoBio/goquery"
 )
+
+var Pipelines = make(map[string]*pipe.Pipeline, 16)
+var Processors = make(map[string]*proc.Processor, 16)
+var Queues = make(map[string]*sche.Queue, 16)
+var URLs = make(map[string]string, 16)
 
 type Page struct {
 	URL    string

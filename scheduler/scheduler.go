@@ -4,12 +4,6 @@ const (
 	Default_Max = 128
 )
 
-var Queues = make(map[string]Queue, 16)
-
-func Add(key string, value Queue) {
-	Queues[key] = value
-}
-
 type Queue interface {
 	Length() int
 	Push(v interface{})
