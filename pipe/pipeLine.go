@@ -28,6 +28,7 @@ func NewConsolePipeline() *ConsolePipeline {
 
 func (console *ConsolePipeline) Out(p *downloader.Page) error {
 	var err error
+	_, err = console.w.Write([]byte("crawler: " + p.URL + "\n\n"))
 	switch console.mode {
 	case NORMAL:
 		for k, v := range p.Fields {
@@ -76,4 +77,7 @@ func (filePipeline *FilePipeline) Out(p *downloader.Page) error {
 
 func (filePipeline *FilePipeline) Close() error {
 	return filePipeline.w.Close()
+}
+
+func (filePipeline *FilePipeline) Mode(mode int) {
 }

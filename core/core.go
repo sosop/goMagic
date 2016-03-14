@@ -51,7 +51,7 @@ func (m *Magic) SetThread(nThread int) *Magic {
 
 func (m *Magic) execute() {
 	url := m.queue.Pop()
-	p := downloader.NewPage(url.(string))
+	p := downloader.NewPage(url.(string), m.queue)
 	m.Proc.Process(p)
 	m.pipeline.Out(p)
 }

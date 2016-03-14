@@ -2,6 +2,7 @@ package downloader
 
 import (
 	"encoding/json"
+	"goMagic/scheduler"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -9,10 +10,15 @@ import (
 type Page struct {
 	URL    string
 	Fields map[string][]string
+	queue  scheduler.Queue
 }
 
-func NewPage(url string) *Page {
-	return &Page{url, make(map[string][]string, 32)}
+func NewPage(url string, queue scheduler.Queue) *Page {
+	return &Page{url, make(map[string][]string, 32), queue}
+}
+
+func (p *Page) AddTargetURL(url string) {
+	p.queue.Push(url)
 }
 
 func (p *Page) Parser() (*goquery.Document, error) {
@@ -30,6 +36,10 @@ func (p *Page) Maps() []map[string]string {
 	for k, _ := range p.Fields {
 		colNames[count] = k
 		count++
+	}
+
+	if count == 0 {
+		return nil
 	}
 
 	rows := len(p.Fields[colNames[0]])
