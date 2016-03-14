@@ -7,10 +7,11 @@ import (
 
 type Pipeline interface {
 	Out(s string) error
+	Close() error
 }
 
 type ConsolePipeline struct {
-	w io.Writer
+	w io.WriteCloser
 }
 
 func NewConsolePipeline() *ConsolePipeline {
@@ -20,4 +21,8 @@ func NewConsolePipeline() *ConsolePipeline {
 func (console *ConsolePipeline) Out(s string) error {
 	_, err := console.w.Write([]byte(s))
 	return err
+}
+
+func (console *ConsolePipeline) Close() error {
+	return console.w.Close()
 }
