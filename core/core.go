@@ -6,6 +6,7 @@ import (
 	proc "goMagic/processor"
 	"goMagic/scheduler"
 	"runtime"
+	"sync"
 )
 
 var (
@@ -58,11 +59,15 @@ func (m *Magic) execute() {
 
 func (m *Magic) Run() {
 	defer m.pipeline.Close()
+	var wg sync.WaitGroup
+	wg.Add(m.threadN)
 	for i := 0; i < m.threadN; i++ {
 		go func() {
+			defer wg.Done()
 			for m.queue.Length() > 0 {
 				m.execute()
 			}
 		}()
 	}
+	wg.Wait()
 }
