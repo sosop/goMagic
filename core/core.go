@@ -58,7 +58,11 @@ func (m *Magic) execute() {
 
 func (m *Magic) Run() {
 	defer m.pipeline.Close()
-	for m.queue.Length() > 0 {
-		m.execute()
+	for i := 0; i < m.threadN; i++ {
+		go func() {
+			for m.queue.Length() > 0 {
+				m.execute()
+			}
+		}()
 	}
 }
