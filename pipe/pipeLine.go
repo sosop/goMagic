@@ -27,27 +27,7 @@ func NewConsolePipeline() *ConsolePipeline {
 }
 
 func (console *ConsolePipeline) Out(p *downloader.Page) error {
-	var err error
-	_, err = console.w.Write([]byte("crawler: " + p.URL + "\n\n"))
-	switch console.mode {
-	case NORMAL:
-		for k, v := range p.Fields {
-			_, err = console.w.Write([]byte(k + ": \n"))
-			for _, v := range v {
-				_, err = console.w.Write([]byte("\t" + v + "\n"))
-			}
-		}
-	case MAPS:
-		for _, v := range p.Maps() {
-			for kk, vv := range v {
-				_, err = console.w.Write([]byte(kk + ": " + vv + "\t\t"))
-			}
-			_, err = console.w.Write([]byte("\n"))
-		}
-	default:
-		console.w.Write([]byte("choose out mode!"))
-	}
-	return err
+	return CommonOut(console.w, p, console.mode)
 }
 
 func (console *ConsolePipeline) Close() error {
@@ -59,7 +39,8 @@ func (console *ConsolePipeline) Mode(mode int) {
 }
 
 type FilePipeline struct {
-	w *os.File
+	w    *os.File
+	mode int
 }
 
 func NewFilePipeline(filename string) *FilePipeline {
@@ -67,12 +48,11 @@ func NewFilePipeline(filename string) *FilePipeline {
 	if err != nil {
 		panic(err)
 	}
-	return &FilePipeline{file}
+	return &FilePipeline{w: file}
 }
 
 func (filePipeline *FilePipeline) Out(p *downloader.Page) error {
-	_, err := filePipeline.w.WriteString("")
-	return err
+	return CommonOut(filePipeline.w, p, filePipeline.mode)
 }
 
 func (filePipeline *FilePipeline) Close() error {
@@ -80,4 +60,29 @@ func (filePipeline *FilePipeline) Close() error {
 }
 
 func (filePipeline *FilePipeline) Mode(mode int) {
+	filePipeline.mode = mode
+}
+
+func CommonOut(w io.Writer, p *downloader.Page, mode int) error {
+	var err error
+	_, err = w.Write([]byte("crawler: " + p.URL + "\n\n"))
+	switch mode {
+	case NORMAL:
+		for k, v := range p.Fields {
+			_, err = w.Write([]byte(k + ": \n"))
+			for _, v := range v {
+				_, err = w.Write([]byte("\t" + v + "\n"))
+			}
+		}
+	case MAPS:
+		for _, v := range p.Maps() {
+			for kk, vv := range v {
+				_, err = w.Write([]byte(kk + ": " + vv + "\t\t"))
+			}
+			_, err = w.Write([]byte("\n"))
+		}
+	default:
+		w.Write([]byte("choose out mode!"))
+	}
+	return err
 }
